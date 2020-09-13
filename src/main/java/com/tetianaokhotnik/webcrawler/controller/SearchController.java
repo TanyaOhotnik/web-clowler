@@ -38,7 +38,8 @@ public class SearchController
             return "index";
         }
 
-        SearchRequest searchRequest = SearchRequestFormConverter.searchRequestFormToSearchRequest(searchRequestInput, true);
+        SearchRequest searchRequest = SearchRequestFormConverter.searchRequestFormToSearchRequest(searchRequestInput,
+                true);
 
         searchService.startSearch(searchRequest);
 

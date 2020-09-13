@@ -40,10 +40,12 @@ public class ConcurrentSearchService implements ISearchService
         urlsQueue.add(searchRequest.getStartUrl());
 
         final ExecutorService rootExecutorService = Executors.newCachedThreadPool();
-        final ExecutorService downloadTaskExecutorsService = Executors.newFixedThreadPool(searchRequest.getThreadCount());
+        final ExecutorService downloadTaskExecutorsService =
+                Executors.newFixedThreadPool(searchRequest.getThreadCount());
 
         Integer maxScannedUrls = searchRequest.getMaxScannedUrls();
-        rootExecutorService.submit(new DownloadRunnable(urlsQueue, documentsQueue, downloadTaskExecutorsService, maxScannedUrls));
+        rootExecutorService.submit(new DownloadRunnable(urlsQueue, documentsQueue, downloadTaskExecutorsService,
+                maxScannedUrls));
         rootExecutorService.submit(new SearchRunnable(urlsQueue, documentsQueue, maxScannedUrls));
     }
 

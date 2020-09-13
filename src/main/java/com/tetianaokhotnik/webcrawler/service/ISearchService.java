@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ISearchService
 {
-     void startSearch(SearchRequest searchRequest);
+    void startSearch(SearchRequest searchRequest);
 
-     List<SearchStatus> getSearchStatus(String searchGuid);
+    List<SearchStatus> getSearchStatus(String searchGuid);
 }

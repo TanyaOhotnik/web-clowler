@@ -29,10 +29,12 @@ public class DownloadRunnable implements Runnable
     private BlockingQueue<DownloadedDocument> documentQueue;
     private ExecutorService executorService;
     private int maxScannedUrls;
-    int processedUrls;
+    private int processedUrls;
 
-    public DownloadRunnable(BlockingQueue<String> urlsQueue, BlockingQueue<DownloadedDocument> documentQueue,
-                            ExecutorService executorService, int maxScannedUrls)
+    public DownloadRunnable(BlockingQueue<String> urlsQueue,
+                            BlockingQueue<DownloadedDocument> documentQueue,
+                            ExecutorService executorService,
+                            int maxScannedUrls)
     {
         this.urlsQueue = urlsQueue;
         this.documentQueue = documentQueue;
@@ -68,6 +70,7 @@ public class DownloadRunnable implements Runnable
                     }
                     return false;
                 });
+
                 processedUrls++;
             }
         }
@@ -100,7 +103,7 @@ public class DownloadRunnable implements Runnable
         @Override
         public DownloadedDocument get()
         {
-            if(currentUrl == null)
+            if (currentUrl == null)
             {
                 return new DownloadedDocument();
             }

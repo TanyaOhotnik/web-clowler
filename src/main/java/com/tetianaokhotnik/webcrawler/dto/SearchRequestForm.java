@@ -9,14 +9,14 @@ import javax.validation.constraints.Size;;
 public class SearchRequestForm
 {
     @NotNull
-    @Size(min=1, max=256)
+    @Size(min = 1, max = 256)
     @Pattern(regexp = "((((https|http):(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$," +
             "\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%\\/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!\\/\\\\w]*))?)",
             message = "URL does not match valid URL pattern")
     private String startUrl;
 
     @NotNull
-    @Size(min=1, max=256)
+    @Size(min = 1, max = 256)
     private String searchedText;
 
     @NotNull
