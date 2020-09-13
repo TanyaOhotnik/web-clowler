@@ -6,14 +6,17 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.css}"/>
 </head>
 <body>
-<div class="container">
+<div class="container text-center">
+    <h2 class="p-4 mt-3 bg-secondary"> Welcome to web-crawler. Fill in the from below and hit the button!</h2>
+</div>
+<div class="container p-4">
     <form action="#" th:action="@{/search}" th:object="${searchRequest}" method="post">
         <div class="form-group">
             <label for="startUrlInput">Root url to start scan from</label>
             <input type="text" th:field="*{startUrl}" class="form-control" id="startUrlInput"
                    placeholder="Enter url, e.g. https://edition.cnn.com/">
             <div class="text-danger">
-            <td th:if="${#fields.hasErrors('startUrl')}" th:errors="*{startUrl}"></td>
+                <td th:if="${#fields.hasErrors('startUrl')}" th:errors="*{startUrl}"></td>
             </div>
         </div>
         <div class="form-group">
@@ -21,7 +24,7 @@
             <input type="text" th:field="*{searchedText}" class="form-control" id="searchTextInput"
                    placeholder="Enter search text, e.g. 'Europe'">
             <div class="text-danger">
-            <td th:if="${#fields.hasErrors('searchedText')}" th:errors="*{searchedText}"></td>
+                <td th:if="${#fields.hasErrors('searchedText')}" th:errors="*{searchedText}"></td>
             </div>
         </div>
         <div class="form-group">
@@ -29,7 +32,7 @@
             <input type="text" th:field="*{threadCount}" class="form-control" id="downloadThreadCountInput"
                    placeholder="Enter thread count, e.g. 4">
             <div class="text-danger">
-            <td th:if="${#fields.hasErrors('threadCount')}" th:errors="*{threadCount}">/td>
+                <td th:if="${#fields.hasErrors('threadCount')}" th:errors="*{threadCount}">/td>
             </div>
         </div>
         <div class="form-group">
@@ -37,7 +40,7 @@
             <input type="text" th:field="*{maxScannedUrls}" class="form-control" id="maxScannedUrlInput"
                    placeholder="Maximum scanned urls, e.g. 15">
             <div class="text-danger">
-            <td th:if="${#fields.hasErrors('maxScannedUrls')}" th:errors="*{maxScannedUrls}"></td>
+                <td th:if="${#fields.hasErrors('maxScannedUrls')}" th:errors="*{maxScannedUrls}"></td>
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>

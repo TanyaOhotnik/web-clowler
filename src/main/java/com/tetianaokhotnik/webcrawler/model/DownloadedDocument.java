@@ -6,14 +6,26 @@ public class DownloadedDocument
 
     private String content;
     private String url;
+    private String error;
 
     public DownloadedDocument()
     {
     }
 
-    public DownloadedDocument(String content, String url)
+    public DownloadedDocument(String url, String content, String error)
     {
+        this.url = url;
         this.content = content;
+        this.error = error;
+    }
+
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public void setUrl(String url)
+    {
         this.url = url;
     }
 
@@ -27,19 +39,19 @@ public class DownloadedDocument
         this.content = content;
     }
 
-    public String getUrl()
+    public String getError()
     {
-        return url;
+        return error;
     }
 
-    public void setUrl(String url)
+    public void setError(String error)
     {
-        this.url = url;
+        this.error = error;
     }
 
     public static DownloadedDocument createPoisonPill()
     {
-        return new DownloadedDocument(POISON_PILL, POISON_PILL);
+        return new DownloadedDocument(POISON_PILL, POISON_PILL, null);
     }
 
     public static boolean isPoisonPill(DownloadedDocument document)
@@ -50,5 +62,10 @@ public class DownloadedDocument
         }
 
         return POISON_PILL.equals(document.content);
+    }
+
+    public static boolean isEmpty(DownloadedDocument document)
+    {
+        return document.getContent() == null || !document.getContent().isEmpty();
     }
 }

@@ -4,6 +4,7 @@ package com.tetianaokhotnik.webcrawler.controller;
 import com.tetianaokhotnik.webcrawler.dto.SearchRequestForm;
 import com.tetianaokhotnik.webcrawler.dto.SearchRequestFormConverter;
 import com.tetianaokhotnik.webcrawler.model.SearchRequest;
+import com.tetianaokhotnik.webcrawler.model.SearchStatus;
 import com.tetianaokhotnik.webcrawler.service.ISearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class SearchController
@@ -53,7 +55,13 @@ public class SearchController
     public String startSearch(@PathVariable("guid") String guid, Model model)
     {
 
+        List<SearchStatus> searchStatus = searchService.getSearchStatus(guid);
+        SearchRequest searchRequest = searchService.getSearchRequest(guid);
+
         model.addAttribute("searchGuid", guid);
+        model.addAttribute("searchStatuses", searchStatus);
+        model.addAttribute("searchRequest", searchRequest);
+
         return "status";
     }
 

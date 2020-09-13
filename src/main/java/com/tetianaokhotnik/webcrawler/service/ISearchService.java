@@ -11,4 +11,6 @@ public interface ISearchService
     void startSearch(SearchRequest searchRequest);
 
     List<SearchStatus> getSearchStatus(String searchGuid);
+
+    SearchRequest getSearchRequest(String searchGuid);
 }

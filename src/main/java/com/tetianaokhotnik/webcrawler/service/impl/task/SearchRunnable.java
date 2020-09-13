@@ -1,6 +1,7 @@
 package com.tetianaokhotnik.webcrawler.service.impl.task;
 
 import com.tetianaokhotnik.webcrawler.model.DownloadedDocument;
+import com.tetianaokhotnik.webcrawler.model.SearchStatus;
 import com.tetianaokhotnik.webcrawler.service.impl.ConcurrentSearchService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
@@ -27,13 +29,17 @@ public class SearchRunnable implements Runnable
 
     private BlockingQueue<String> urlsQueue;
     private BlockingQueue<DownloadedDocument> documentQueue;
+    private Map<String, SearchStatus> statuses;
     private int maxUrls;
 
-    public SearchRunnable(BlockingQueue<String> urlsQueue, BlockingQueue<DownloadedDocument> documentQueue,
+    public SearchRunnable(BlockingQueue<String> urlsQueue,
+                          BlockingQueue<DownloadedDocument> documentQueue,
+                          Map<String, SearchStatus> statuses,
                           int maxUrls)
     {
         this.urlsQueue = urlsQueue;
         this.documentQueue = documentQueue;
+        this.statuses = statuses;
         this.maxUrls = maxUrls;
     }
 
@@ -43,17 +49,24 @@ public class SearchRunnable implements Runnable
         int foundUrlsSum = 0;
         while (true)
         {
-            final DownloadedDocument documentBody = documentQueue.poll();
-            if (DownloadedDocument.isPoisonPill(documentBody))
+            final DownloadedDocument downloadedDocument = documentQueue.poll();
+
+            if (DownloadedDocument.isPoisonPill(downloadedDocument))
             {
+                logger.info("Received poison pill, queue size {}", documentQueue.size());
                 break;
             }
-            if (documentBody != null)
+            if (downloadedDocument != null)
             {
+                logger.info("Processing downloaded document {}", downloadedDocument.getUrl());
+                final String documentUrl = downloadedDocument.getUrl();
+
+                updateStatus(documentUrl, SearchStatus.Status.ANALYZING, null);
+
                 boolean needToSearchUrls = foundUrlsSum < maxUrls;
                 if (needToSearchUrls)
                 {
-                    List<String> foundUrls = searchUrls(documentBody);
+                    List<String> foundUrls = searchUrls(downloadedDocument);
 
                     urlsQueue.addAll(foundUrls);
                     foundUrlsSum += foundUrls.size();
@@ -62,14 +75,28 @@ public class SearchRunnable implements Runnable
                     logger.info("Links limit reached, but text should be processed");
                 }
 
-                int matches = searchText(documentBody);
+                int matches = searchText(downloadedDocument);
                 //TODO manage search status here
+
+                updateStatus(documentUrl, SearchStatus.Status.DONE, null);
             }
             //TODO handle case when links limit not reached, but all docs scanned
         }
         //let url consumer know, that all links scanned
         logger.info("Adding poison pill");
         urlsQueue.add(ConcurrentSearchService.POISON_PILL);
+    }
+
+    private void updateStatus(String currentUrl, SearchStatus.Status status, String comment)
+    {
+        SearchStatus cachedSearchStatus = statuses.get(currentUrl);
+
+        SearchStatus newSearchStatus = new SearchStatus();
+        newSearchStatus.setUrl(currentUrl);
+        newSearchStatus.setStatus(status);
+        newSearchStatus.setStatusDetails(comment);
+
+        statuses.replace(currentUrl, cachedSearchStatus, newSearchStatus);
     }
 
     private int searchText(DownloadedDocument downloadedDocument)

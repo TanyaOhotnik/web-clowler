@@ -7,7 +7,35 @@
 </head>
 <body>
 <div class="container">
-  TODO status for <span th:text="*{searchGuid}"></span> search
+    <div class="container text-center">
+        <h2 class="p-4 mt-3 bg-secondary"> Search status</h2>
+    </div>
+    <div class="container p-4">
+        <p>Here is a search status for <span th:text="*{searchGuid}"></span> search</p>
+        <p>Start URL: <span th:text="${searchRequest.getStartUrl()}"></span></p>
+        <p>Searched text: <span th:text="${searchRequest.getSearchedText()}"></span></p>
+    </div>
+    <div class="container p-4">
+        <table class="table-striped p-4">
+            <thead>
+            <tr>
+                <th>URL</th>
+                <th>Status</th>
+                <th>Comment</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${searchStatuses.isEmpty()}">
+                <td colspan="3"> No status available for asked search</td>
+            </tr>
+            <tr th:each="searchStatus : ${searchStatuses}">
+                <td><span th:text="${searchStatus.getUrl()}"> Url </span></td>
+                <td><span th:text="${searchStatus.getStatus()}"> Status </span></td>
+                <td><span th:text="${searchStatus.getStatusDetails()}"> Comments </span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>
