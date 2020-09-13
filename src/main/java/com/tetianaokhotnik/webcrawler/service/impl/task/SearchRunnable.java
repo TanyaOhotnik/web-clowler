@@ -1,6 +1,7 @@
 package com.tetianaokhotnik.webcrawler.service.impl.task;
 
 import com.tetianaokhotnik.webcrawler.model.DownloadedDocument;
+import com.tetianaokhotnik.webcrawler.model.SearchRequest;
 import com.tetianaokhotnik.webcrawler.model.SearchStatus;
 import com.tetianaokhotnik.webcrawler.service.impl.ConcurrentSearchService;
 import org.jsoup.Jsoup;
@@ -16,31 +17,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SearchRunnable implements Runnable
 {
+    private static final Logger logger = LoggerFactory.getLogger(SearchRunnable.class);
+
     private static final String HREF = "href";
     private static final String A_HREF = "a[href]";
     private static final String HASHTAG = "#";
     private static final String FORWARDS_SLASH = "/";
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchRunnable.class);
-
     private BlockingQueue<String> urlsQueue;
     private BlockingQueue<DownloadedDocument> documentQueue;
     private Map<String, SearchStatus> statuses;
-    private int maxUrls;
+    private SearchRequest searchRequest;
 
     public SearchRunnable(BlockingQueue<String> urlsQueue,
                           BlockingQueue<DownloadedDocument> documentQueue,
                           Map<String, SearchStatus> statuses,
-                          int maxUrls)
+                          SearchRequest searchRequest)
     {
         this.urlsQueue = urlsQueue;
         this.documentQueue = documentQueue;
         this.statuses = statuses;
-        this.maxUrls = maxUrls;
+        this.searchRequest = searchRequest;
     }
 
     @Override
@@ -61,9 +64,9 @@ public class SearchRunnable implements Runnable
                 logger.info("Processing downloaded document {}", downloadedDocument.getUrl());
                 final String documentUrl = downloadedDocument.getUrl();
 
-                updateStatus(documentUrl, SearchStatus.Status.ANALYZING, null);
+                updateStatus(documentUrl, SearchStatus.Status.ANALYZING, null, null);
 
-                boolean needToSearchUrls = foundUrlsSum < maxUrls;
+                boolean needToSearchUrls = foundUrlsSum < searchRequest.getMaxScannedUrls();
                 if (needToSearchUrls)
                 {
                     List<String> foundUrls = searchUrls(downloadedDocument);
@@ -75,10 +78,9 @@ public class SearchRunnable implements Runnable
                     logger.info("Links limit reached, but text should be processed");
                 }
 
-                int matches = searchText(downloadedDocument);
-                //TODO manage search status here
+                int matches = searchText(downloadedDocument, searchRequest.getSearchedText());
 
-                updateStatus(documentUrl, SearchStatus.Status.DONE, null);
+                updateStatus(documentUrl, SearchStatus.Status.DONE, null, matches);
             }
             //TODO handle case when links limit not reached, but all docs scanned
         }
@@ -87,22 +89,39 @@ public class SearchRunnable implements Runnable
         urlsQueue.add(ConcurrentSearchService.POISON_PILL);
     }
 
-    private void updateStatus(String currentUrl, SearchStatus.Status status, String comment)
+    private void updateStatus(String currentUrl, SearchStatus.Status status, String comment, Integer matches)
     {
-        SearchStatus cachedSearchStatus = statuses.get(currentUrl);
 
-        SearchStatus newSearchStatus = new SearchStatus();
-        newSearchStatus.setUrl(currentUrl);
-        newSearchStatus.setStatus(status);
-        newSearchStatus.setStatusDetails(comment);
+        statuses.compute(currentUrl, (key, value) ->
+        {
+            SearchStatus newSearchStatus = new SearchStatus();
+            newSearchStatus.setUrl(currentUrl);
+            newSearchStatus.setStatus(status);
+            newSearchStatus.setStatusDetails(comment);
+            newSearchStatus.setMatches(matches);
+            return newSearchStatus;
+        });
 
-        statuses.replace(currentUrl, cachedSearchStatus, newSearchStatus);
     }
 
-    private int searchText(DownloadedDocument downloadedDocument)
+    private int searchText(DownloadedDocument downloadedDocument, String searchedText)
     {
-        //search for matches, return amount of matches
-        return 0;
+        if (downloadedDocument == null || downloadedDocument.getContent().isEmpty())
+        {
+            return 0;
+        }
+
+        final String documentBody = downloadedDocument.getContent();
+
+        final Matcher matcher = Pattern.compile(searchedText).matcher(documentBody);
+
+        int count = 0;
+        while (matcher.find())
+        {
+            count++;
+        }
+
+        return count;
     }
 
     private List<String> searchUrls(DownloadedDocument downloadedDocument)
@@ -154,6 +173,6 @@ public class SearchRunnable implements Runnable
      */
     private boolean isNotRecoverable(String url)
     {
-        return !url.startsWith(HASHTAG) && !url.equals(FORWARDS_SLASH) && !url.equals("javascript:void(0)");
+        return !url.startsWith(HASHTAG) && !url.equals(FORWARDS_SLASH) && !url.startsWith("javascript:void(0)");
     }
 }

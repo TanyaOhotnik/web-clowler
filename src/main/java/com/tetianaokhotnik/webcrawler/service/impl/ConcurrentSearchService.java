@@ -53,9 +53,10 @@ public class ConcurrentSearchService implements ISearchService
                 Executors.newFixedThreadPool(searchRequest.getThreadCount());
 
         Integer maxScannedUrls = searchRequest.getMaxScannedUrls();
+
         rootExecutorService.submit(new DownloadRunnable(urlsQueue, documentsQueue, downloadTaskExecutorsService,
                 statusesByUrl, maxScannedUrls));
-        rootExecutorService.submit(new SearchRunnable(urlsQueue, documentsQueue, statusesByUrl, maxScannedUrls));
+        rootExecutorService.submit(new SearchRunnable(urlsQueue, documentsQueue, statusesByUrl, searchRequest));
     }
 
     @Override

@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +35,7 @@ public class DownloadRunnable implements Runnable
     private BlockingQueue<DownloadedDocument> documentQueue;
     private ExecutorService executorService;
     private Map<String, SearchStatus> statuses;
+    private Set<String> processedUrls;
     private int maxScannedUrls;
 
     public DownloadRunnable(BlockingQueue<String> urlsQueue,
@@ -46,13 +49,14 @@ public class DownloadRunnable implements Runnable
         this.executorService = executorService;
         this.maxScannedUrls = maxScannedUrls;
         this.statuses = statuses;
+        this.processedUrls = new HashSet<>();
     }
 
     public void run()
     {
-        int processedUrls = 0;
+        int processedUrlsCount = 0;
 
-        while (processedUrls < maxScannedUrls)
+        while (processedUrlsCount < maxScannedUrls)
         {
             String currentUrl = urlsQueue.poll();
 
@@ -61,14 +65,24 @@ public class DownloadRunnable implements Runnable
                 break;
             }
 
+            if (processedUrls.contains(currentUrl))
+            {
+                logger.info("Skipping {}, already processed", currentUrl);
+                continue;
+            }
+
             if (currentUrl != null)
             {
                 logger.info("Processing {}", currentUrl);
+                //store processed url to guarantee that only unique urls loaded
+                processedUrls.add(currentUrl);
 
                 updateStatus(currentUrl, SearchStatus.Status.IN_PROGRESS, null);
 
                 CompletableFuture<DownloadedDocument> downloadResult =
                         CompletableFuture.supplyAsync(new DownloadSupplier(currentUrl), executorService);
+
+                //TODO consider saving data in a file in case of big pages
 
                 downloadResult.thenApply((downloadedDocument) ->
                 {
@@ -85,11 +99,11 @@ public class DownloadRunnable implements Runnable
                     return false;
                 });
 
-                processedUrls++;
+                processedUrlsCount++;
             }
         }
 
-        logger.info("Queued processing for {} urls, limit reached", processedUrls);
+        logger.info("Queued processing for {} urls, limit reached", processedUrlsCount);
 
         try
         {
@@ -107,14 +121,14 @@ public class DownloadRunnable implements Runnable
 
     private void updateStatus(String currentUrl, SearchStatus.Status status, String comment)
     {
-        SearchStatus cachedSearchStatus = statuses.get(currentUrl);
-
-        SearchStatus newSearchStatus = new SearchStatus();
-        newSearchStatus.setUrl(currentUrl);
-        newSearchStatus.setStatus(status);
-        newSearchStatus.setStatusDetails(comment);
-
-        statuses.replace(currentUrl, cachedSearchStatus, newSearchStatus);
+        statuses.compute(currentUrl, (key, value) ->
+        {
+            SearchStatus newSearchStatus = new SearchStatus();
+            newSearchStatus.setUrl(currentUrl);
+            newSearchStatus.setStatus(status);
+            newSearchStatus.setStatusDetails(comment);
+            return newSearchStatus;
+        });
     }
 
 
@@ -137,7 +151,7 @@ public class DownloadRunnable implements Runnable
 
             try (CloseableHttpClient httpClient = HttpClients.custom()
                     .setDefaultRequestConfig(RequestConfig.custom()
-                     .setCookieSpec(CookieSpecs.STANDARD)
+                            .setCookieSpec(CookieSpecs.STANDARD)
                             .build())
                     .build();)
             {
@@ -157,7 +171,8 @@ public class DownloadRunnable implements Runnable
                         }
                     }
 
-                    final String errorStatus = String.format("Failed with %s", response.getStatusLine().getStatusCode());
+                    final String errorStatus = String.format("Failed with %s",
+                            response.getStatusLine().getStatusCode());
                     return new DownloadedDocument(currentUrl, null, errorStatus);
                 }
             }

@@ -22,7 +22,7 @@ import java.util.List;
 public class SearchController
 {
     @Autowired
-    ISearchService searchService;
+    private ISearchService searchService;
 
     @GetMapping("/search")
     public String search(Model model)

@@ -17,21 +17,25 @@
     </div>
     <div class="container p-4">
         <table class="table-striped p-4">
-            <thead>
+            <thead class="text-center">
             <tr>
+                <th>#</th>
                 <th>URL</th>
                 <th>Status</th>
                 <th>Comment</th>
+                <th>Matches</th>
             </tr>
             </thead>
             <tbody>
             <tr th:if="${searchStatuses.isEmpty()}">
                 <td colspan="3"> No status available for asked search</td>
             </tr>
-            <tr th:each="searchStatus : ${searchStatuses}">
-                <td><span th:text="${searchStatus.getUrl()}"> Url </span></td>
-                <td><span th:text="${searchStatus.getStatus()}"> Status </span></td>
-                <td><span th:text="${searchStatus.getStatusDetails()}"> Comments </span></td>
+            <tr th:each="searchStatus, iStat : ${searchStatuses}">
+                <td><span th:text="${iStat.index + 1}"></span></td>
+                <td><span th:text="${searchStatus.getUrl()}"> </span></td>
+                <td><span th:text="${searchStatus.getStatus()}"> </span></td>
+                <td><span th:text="${searchStatus.getStatusDetails()}"> </span></td>
+                <td><span th:text="${searchStatus.getMatches()}"> </span></td>
             </tr>
             </tbody>
         </table>

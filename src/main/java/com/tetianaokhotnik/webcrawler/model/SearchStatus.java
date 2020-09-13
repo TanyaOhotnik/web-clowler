@@ -6,17 +6,19 @@ public class SearchStatus
     private String url;
     private Status status;
     private String statusDetails;
+    private Integer matches;
 
     public SearchStatus()
     {
     }
 
-    public SearchStatus(String searchGuid, String url, Status status, String statusDetails)
+    public SearchStatus(String searchGuid, String url, Status status, String statusDetails, int matches)
     {
         this.searchGuid = searchGuid;
         this.url = url;
         this.status = status;
         this.statusDetails = statusDetails;
+        this.matches = matches;
     }
 
     public String getSearchGuid()
@@ -57,6 +59,16 @@ public class SearchStatus
     public void setStatusDetails(String statusDetails)
     {
         this.statusDetails = statusDetails;
+    }
+
+    public Integer getMatches()
+    {
+        return matches;
+    }
+
+    public void setMatches(Integer matches)
+    {
+        this.matches = matches;
     }
 
     public enum Status
