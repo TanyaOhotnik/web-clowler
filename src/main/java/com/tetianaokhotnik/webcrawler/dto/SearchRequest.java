@@ -76,7 +76,7 @@ public class SearchRequest
                 "startUrl='" + startUrl + '\'' +
                 ", searchedText='" + searchedText + '\'' +
                 ", threadCount=" + threadCount +
-                ", maxUrlCount=" + maxScannedUrls +
+                ", maxScannedUrls=" + maxScannedUrls +
                 '}';
     }
 }

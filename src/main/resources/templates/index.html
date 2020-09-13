@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link href="../static/css/bootstrap.css" rel="stylesheet" th:href="@{/css/bootstrap.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}"/>
 </head>
 <body>
 <div class="container">
@@ -37,7 +37,7 @@
             <input type="text" th:field="*{maxScannedUrls}" class="form-control" id="maxScannedUrlInput"
                    placeholder="Maximum scanned urls, e.g. 15">
             <div class="text-danger">
-            <td th:if="${#fields.hasErrors('maxUrlCount')}" th:errors="*{maxScannedUrls}"></td>
+            <td th:if="${#fields.hasErrors('maxScannedUrls')}" th:errors="*{maxScannedUrls}"></td>
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>

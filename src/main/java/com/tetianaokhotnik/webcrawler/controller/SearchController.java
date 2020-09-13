@@ -25,10 +25,12 @@ public class SearchController
     }
 
     @PostMapping("/search")
-    public String startSearch(@Valid @ModelAttribute SearchRequest searchRequest, BindingResult bindingResult, Model model)
+    public String startSearch(@Valid @ModelAttribute SearchRequest searchRequest, BindingResult bindingResult,
+                              Model model)
     {
-        if (bindingResult.hasErrors()) {
-            return "index";
+        if (bindingResult.hasErrors())
+        {
+            return "search";
         }
         String searchGuid = UUID.randomUUID().toString();
         //TODO start search
@@ -38,12 +40,18 @@ public class SearchController
     }
 
     @GetMapping("/search/{guid}")
-    public String startSearch(@PathVariable("guid")String guid, Model model)
+    public String startSearch(@PathVariable("guid") String guid, Model model)
     {
 
         //TODO start search
         model.addAttribute("searchGuid", guid);
         return "status";
+    }
+
+    @GetMapping("/error")
+    public String error()
+    {
+        return "error";
     }
 
 }
