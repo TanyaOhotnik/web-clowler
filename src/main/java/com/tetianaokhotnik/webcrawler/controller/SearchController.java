@@ -30,6 +30,12 @@ public class SearchController
     @Qualifier("ConcurrentSearchService")
     private ISearchService searchService;
 
+    @GetMapping("/")
+    public String redirectToSearch(Model model)
+    {
+        return "redirect:search/";
+    }
+
     @GetMapping("/search")
     public String search(Model model)
     {

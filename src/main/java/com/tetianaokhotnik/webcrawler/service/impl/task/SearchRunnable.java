@@ -113,7 +113,7 @@ public class SearchRunnable implements Runnable
 
         final String documentBody = downloadedDocument.getContent();
 
-        final Matcher matcher = Pattern.compile(searchedText).matcher(documentBody);
+        final Matcher matcher = Pattern.compile(searchedText, Pattern.CASE_INSENSITIVE).matcher(documentBody);
 
         int count = 0;
         while (matcher.find())

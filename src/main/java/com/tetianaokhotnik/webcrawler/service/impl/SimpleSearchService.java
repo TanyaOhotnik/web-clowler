@@ -86,7 +86,7 @@ public class SimpleSearchService implements ISearchService
                 downloadedDocumentCompletableFutures.add(downloadedDocumentCompletableFuture);
             }
 
-            //wait for all futures to be completed to get ordered list of tree leafs
+            //wait for all futures to be completed to get ordered list of tree leaves
             CompletableFuture.allOf(downloadedDocumentCompletableFutures.toArray(new CompletableFuture[0])).join();
 
             for (CompletableFuture<DownloadedDocument> currentFuture : downloadedDocumentCompletableFutures)
