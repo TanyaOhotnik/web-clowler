@@ -61,7 +61,7 @@ public class SearchRunnable implements Runnable
             }
             if (downloadedDocument != null)
             {
-                logger.info("Processing downloaded document {}", downloadedDocument.getUrl());
+                logger.debug("Processing downloaded document {}", downloadedDocument.getUrl());
                 final String documentUrl = downloadedDocument.getUrl();
 
                 updateStatus(documentUrl, SearchStatus.Status.ANALYZING, null, null);
@@ -75,7 +75,7 @@ public class SearchRunnable implements Runnable
                     foundUrlsSum += foundUrls.size();
                 } else
                 {
-                    logger.info("Links limit reached, but text should be processed");
+                    logger.debug("Links limit reached, but text should be processed");
                 }
 
                 int matches = searchText(downloadedDocument, searchRequest.getSearchedText());
@@ -139,23 +139,25 @@ public class SearchRunnable implements Runnable
                         .filter(Objects::nonNull)
                         .collect(Collectors.toCollection(LinkedList::new));
 
-        logger.info("Found {} links from {}", resolvedLinks.size(), rootUrl);
+        logger.debug("Found {} links from {}", resolvedLinks.size(), rootUrl);
 
         return resolvedLinks;
     }
 
     private String appendRelativeLinks(String relativeUrl, String rootUrlStr)
     {
-        if (!relativeUrl.startsWith(FORWARDS_SLASH))
-        {
-            return relativeUrl;
-        }
-
         try
         {
-            logger.info("Trying to convert {} to valid url", relativeUrl);
+            //TODO add apache utils to check validity without exception
+            logger.debug("Trying to convert {} to valid url", relativeUrl);
 
             URL rootUrl = new URL(rootUrlStr);
+
+            if (!relativeUrl.startsWith(FORWARDS_SLASH))
+            {
+                return relativeUrl;
+            }
+
             URL resolvedUrl = new URL(rootUrl.getProtocol(), rootUrl.getHost(), rootUrl.getPort(), relativeUrl);
 
             return resolvedUrl.toString();

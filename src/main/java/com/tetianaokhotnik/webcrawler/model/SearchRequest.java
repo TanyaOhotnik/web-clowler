@@ -8,10 +8,6 @@ public class SearchRequest
     private Integer threadCount;
     private Integer maxScannedUrls;
 
-    public SearchRequest()
-    {
-    }
-
     public SearchRequest(String guid, String startUrl, String searchedText, Integer threadCount, Integer maxScannedUrls)
     {
         this.guid = guid;

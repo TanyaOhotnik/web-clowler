@@ -9,6 +9,7 @@ import com.tetianaokhotnik.webcrawler.service.impl.task.DownloadRunnable;
 import com.tetianaokhotnik.webcrawler.service.impl.task.SearchRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
+@Qualifier("ConcurrentSearchService")
 public class ConcurrentSearchService implements ISearchService
 {
     private static final Logger logger = LoggerFactory.getLogger(ConcurrentSearchService.class);
@@ -54,20 +56,29 @@ public class ConcurrentSearchService implements ISearchService
 
         Integer maxScannedUrls = searchRequest.getMaxScannedUrls();
 
-        rootExecutorService.submit(new DownloadRunnable(urlsQueue, documentsQueue, downloadTaskExecutorsService,
-                statusesByUrl, maxScannedUrls));
-        rootExecutorService.submit(new SearchRunnable(urlsQueue, documentsQueue, statusesByUrl, searchRequest));
+        rootExecutorService.submit(new DownloadRunnable(
+                urlsQueue,
+                documentsQueue,
+                downloadTaskExecutorsService,
+                statusesByUrl,
+                maxScannedUrls));
+
+        rootExecutorService.submit(new SearchRunnable(
+                urlsQueue,
+                documentsQueue,
+                statusesByUrl,
+                searchRequest));
     }
 
     @Override
     public List<SearchStatus> getSearchStatus(String searchRequest)
     {
         Map<String, SearchStatus> stringSearchStatusMap = allSearchCache.get(searchRequest);
-        if (stringSearchStatusMap != null)
+        if (stringSearchStatusMap == null)
         {
-            return new LinkedList<>(stringSearchStatusMap.values());
+            return new LinkedList<>();
         }
-        return new LinkedList<>();
+        return new LinkedList<>(stringSearchStatusMap.values());
     }
 
     @Override

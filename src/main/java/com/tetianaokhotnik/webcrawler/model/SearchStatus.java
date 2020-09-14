@@ -2,6 +2,15 @@ package com.tetianaokhotnik.webcrawler.model;
 
 public class SearchStatus
 {
+    public enum Status
+    {
+        IN_PROGRESS,
+        DOWNLOADED,
+        ANALYZING,
+        DONE,
+        ERROR,
+    }
+
     private String searchGuid;
     private String url;
     private Status status;
@@ -71,13 +80,15 @@ public class SearchStatus
         this.matches = matches;
     }
 
-    public enum Status
+    @Override
+    public String toString()
     {
-        IN_PROGRESS,
-        DOWNLOADED,
-        ANALYZING,
-        DONE,
-        ERROR,
-
+        return "SearchStatus{" +
+                "searchGuid='" + searchGuid + '\'' +
+                ", url='" + url + '\'' +
+                ", status=" + status +
+                ", statusDetails='" + statusDetails + '\'' +
+                ", matches=" + matches +
+                '}';
     }
 }

@@ -8,10 +8,6 @@ public class DownloadedDocument
     private String url;
     private String error;
 
-    public DownloadedDocument()
-    {
-    }
-
     public DownloadedDocument(String url, String content, String error)
     {
         this.url = url;
@@ -62,10 +58,5 @@ public class DownloadedDocument
         }
 
         return POISON_PILL.equals(document.content);
-    }
-
-    public static boolean isEmpty(DownloadedDocument document)
-    {
-        return document.getContent() == null || !document.getContent().isEmpty();
     }
 }

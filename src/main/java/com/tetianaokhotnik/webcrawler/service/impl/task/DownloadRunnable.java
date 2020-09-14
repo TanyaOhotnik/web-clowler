@@ -67,13 +67,13 @@ public class DownloadRunnable implements Runnable
 
             if (processedUrls.contains(currentUrl))
             {
-                logger.info("Skipping {}, already processed", currentUrl);
+                logger.debug("Skipping {}, already processed", currentUrl);
                 continue;
             }
 
             if (currentUrl != null)
             {
-                logger.info("Processing {}", currentUrl);
+                logger.debug("Processing {}", currentUrl);
                 //store processed url to guarantee that only unique urls loaded
                 processedUrls.add(currentUrl);
 
@@ -86,7 +86,7 @@ public class DownloadRunnable implements Runnable
 
                 downloadResult.thenApply((downloadedDocument) ->
                 {
-                    logger.info("Download done for {}", downloadedDocument.getUrl());
+                    logger.debug("Download done for {}", downloadedDocument.getUrl());
 
                     if (downloadedDocument.getContent() != null)
                     {
@@ -173,6 +173,8 @@ public class DownloadRunnable implements Runnable
 
                     final String errorStatus = String.format("Failed with %s",
                             response.getStatusLine().getStatusCode());
+                    logger.debug(errorStatus);
+
                     return new DownloadedDocument(currentUrl, null, errorStatus);
                 }
             }
@@ -180,7 +182,7 @@ public class DownloadRunnable implements Runnable
             {
                 final String errorStatus = String.format("Failed with %s", e.getMessage());
 
-                logger.info("Download failed", e);
+                logger.debug("Download failed", e);
                 return new DownloadedDocument(currentUrl, null, errorStatus);
             }
         }

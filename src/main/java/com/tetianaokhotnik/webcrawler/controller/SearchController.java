@@ -7,6 +7,7 @@ import com.tetianaokhotnik.webcrawler.model.SearchRequest;
 import com.tetianaokhotnik.webcrawler.model.SearchStatus;
 import com.tetianaokhotnik.webcrawler.service.ISearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,18 +22,25 @@ import java.util.List;
 @Controller
 public class SearchController
 {
+    private static final String SEARCH_REQUEST_KEY = "searchRequest";
+    private final String SEARCH_GUID_KEY = "searchGuid";
+    private final String SEARCH_STATUSES_KEY = "searchStatuses";
+
     @Autowired
+    @Qualifier("ConcurrentSearchService")
     private ISearchService searchService;
 
     @GetMapping("/search")
     public String search(Model model)
     {
-        model.addAttribute("searchRequest", new SearchRequestForm());
+        model.addAttribute(SEARCH_REQUEST_KEY, new SearchRequestForm());
+
         return "index";
     }
 
     @PostMapping("/search")
-    public String startSearch(@Valid @ModelAttribute SearchRequestForm searchRequestInput, BindingResult bindingResult,
+    public String startSearch(@Valid @ModelAttribute SearchRequestForm searchRequestInput,
+                              BindingResult bindingResult,
                               Model model)
     {
         if (bindingResult.hasErrors())
@@ -40,13 +48,14 @@ public class SearchController
             return "index";
         }
 
-        SearchRequest searchRequest = SearchRequestFormConverter.searchRequestFormToSearchRequest(searchRequestInput,
-                true);
+        final SearchRequest searchRequest =
+                SearchRequestFormConverter
+                        .searchRequestFormToSearchRequest(searchRequestInput,true);
+        final String requestGuid = searchRequest.getGuid();
 
         searchService.startSearch(searchRequest);
 
-        String requestGuid = searchRequest.getGuid();
-        model.addAttribute("searchGuid", requestGuid);
+        model.addAttribute(SEARCH_GUID_KEY, requestGuid);
 
         return "redirect:search/" + requestGuid;
     }
@@ -54,13 +63,12 @@ public class SearchController
     @GetMapping("/search/{guid}")
     public String startSearch(@PathVariable("guid") String guid, Model model)
     {
+        final List<SearchStatus> searchStatus = searchService.getSearchStatus(guid);
+        final SearchRequest searchRequest = searchService.getSearchRequest(guid);
 
-        List<SearchStatus> searchStatus = searchService.getSearchStatus(guid);
-        SearchRequest searchRequest = searchService.getSearchRequest(guid);
-
-        model.addAttribute("searchGuid", guid);
-        model.addAttribute("searchStatuses", searchStatus);
-        model.addAttribute("searchRequest", searchRequest);
+        model.addAttribute(SEARCH_GUID_KEY, guid);
+        model.addAttribute(SEARCH_STATUSES_KEY, searchStatus);
+        model.addAttribute(SEARCH_REQUEST_KEY, searchRequest);
 
         return "status";
     }
